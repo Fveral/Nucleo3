@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Divider, IconButton, Modal, Portal, Snackbar, Text, TextInput } from 'react-native-paper';
 import { styles } from '../../../themes/styles';
 import { View } from 'react-native';
-import { database } from '../../../config/Config';
+import { auth, database } from '../../../config/Config';
 import { push, ref, set } from 'firebase/database';
 
 interface Props {
@@ -59,7 +59,7 @@ export const NewMascotaComponent = ({showModalMascota, setShowModalMascota}: Pro
             });
             return;
         }
-        const dbRef = ref (database, 'mascotas');
+        const dbRef = ref (database, 'mascotas/' +auth.currentUser?.uid);
         const saveMascota = push(dbRef);
         try {
             await set(saveMascota, formMascota);

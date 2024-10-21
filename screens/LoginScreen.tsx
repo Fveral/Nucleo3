@@ -52,6 +52,7 @@ export const LoginScreen = () => {
                 message: 'Inicio de Sesión Exitoso!',
                 color: '#581f73'
             });
+            navigation.dispatch(CommonActions.navigate({name: 'Home'}))
         } catch (error) {
             console.log(error);
             setShowMessage({

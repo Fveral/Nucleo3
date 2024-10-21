@@ -3,12 +3,13 @@ import { View } from 'react-native';
 import { Avatar, Button, Divider, FAB, IconButton, Modal, Portal, Text, TextInput } from 'react-native-paper';
 import { styles } from '../../themes/styles';
 import { auth, database } from '../../config/Config';
-import firebase from '@firebase/auth';
+import firebase, { signOut } from '@firebase/auth';
 import { updateProfile } from '@firebase/auth';
 import { FlatList } from 'react-native-gesture-handler';
 import { MascotaCardComponent } from './components/MascotaCardComponent';
 import NewMascotaComponent from './components/NewMascotaComponent';
 import { onValue, ref } from 'firebase/database';
+import { CommonActions, useNavigation } from '@react-navigation/native';
 
 interface FormUser {
     name: string;
@@ -26,6 +27,8 @@ export interface Mascota {
 }
 
 export const HomeScreen = () => {
+    const navigation = useNavigation();
+
     const[formUser, setFormUser] = useState<FormUser>({
         name: ""
     });
@@ -50,16 +53,17 @@ export const HomeScreen = () => {
             await updateProfile(userData!, 
                 {displayName: formUser.name}
             )
-        } catch(e) {
-            console.log(e);
+        } catch(error) {
+            console.log(error);
         }
         setShowModalProfile(false);
     }
 
     const getAllProducts = () => {
-        const dbRef = ref(database, 'mascotas');
+        const dbRef = ref(database, 'mascotas/' + auth.currentUser?.uid);
         onValue(dbRef, (snapshot) => {
             const data = snapshot.val();
+            if(!data) return;
             const getKeys = Object.keys(data);
             const listMascotas: Mascota[] = [];
             getKeys.forEach((key) => {
@@ -68,6 +72,16 @@ export const HomeScreen = () => {
             });
             setMascotas(listMascotas);
         })
+    }
+
+    const handleSignOut = async () => {
+        try {
+            await signOut(auth);
+            navigation.dispatch(CommonActions.reset({index:0, routes:[{name:'Login'}]}));
+            setShowModalProfile(false);
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     return (
@@ -121,6 +135,13 @@ export const HomeScreen = () => {
                         value={userData?.email!}
                     />
                     <Button mode='contained' onPress={handleUpdateUser}>Actualizar</Button>
+                    <View style={styles.iconSignOut}>
+                        <IconButton
+                            icon="logout-variant"
+                            size={35}
+                            onPress={handleSignOut}
+                        />
+                    </View>
                 </Modal>
             </Portal>
             <FAB

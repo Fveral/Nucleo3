@@ -119,6 +119,10 @@ export const styles=StyleSheet.create({
         borderRadius: 5,
         paddingHorizontal: 10,
         marginTop: 5,
+    },
+    iconSignOut: {
+        marginTop: 25,
+        alignItems: 'center'
     }
 
 })

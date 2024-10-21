@@ -4,8 +4,8 @@ import { Button, Text, TextInput } from 'react-native-paper'
 import { styles } from '../../themes/styles'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { Mascota } from './HomeScreen'
-import { database } from '../../config/Config'
-import { ref, update } from 'firebase/database'
+import { auth, database } from '../../config/Config'
+import { ref, remove, update } from 'firebase/database'
 
   const DetailMascot = () => {
     const route = useRoute();
@@ -33,13 +33,23 @@ import { ref, update } from 'firebase/database'
     }
 
     const handleUpdateMascot = async () => {
-        const dbRef = ref(database, 'mascotas/'+formEdit.id);
+        const dbRef = ref(database, 'mascotas/'+ auth.currentUser?.uid + '/' +formEdit.id);
         try {
             await update(dbRef, {
                 edad: formEdit.edad,
                 historialMedico: formEdit.historialMedico,
                 contactoDueno: formEdit.contactoDueno,         
             });
+            navigation.goBack();
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const handleDeleteMascota = async () => {
+        const dbRef = ref(database, 'mascotas/' + auth.currentUser?.uid + '/' +formEdit.id);
+        try {
+            await remove(dbRef);
             navigation.goBack();
         } catch (error) {
             console.log(error);
@@ -118,9 +128,7 @@ import { ref, update } from 'firebase/database'
                 style={styles.button}
                 mode='contained'
                 icon='delete-empty-outline'
-                onPress={() => {
-
-                }}>
+                onPress={handleDeleteMascota}>
                 Eliminar
             </Button>
         </View>
